@@ -23,7 +23,9 @@ print(result)
 
 picklist = []
 for rarity in result:
-    picklist.append(paperlist.loc[paperlist["rate"] == rarity].sample().values.flatten().tolist())
+    picklist.append(
+        paperlist.loc[paperlist["rate"] == rarity].sample().values.flatten().tolist()
+    )
 
 
 for e in picklist:

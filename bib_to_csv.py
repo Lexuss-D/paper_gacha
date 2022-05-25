@@ -41,12 +41,14 @@ for bib_id in bibdata.entries:
         durl = "NA"
 
     if bf.get("booktitle"):
-        text=LatexNodes2Text().latex_to_text(bf["booktitle"])
-        dbooktitle = text.replace("{","").replace("}","")
+        text = LatexNodes2Text().latex_to_text(bf["booktitle"])
+        dbooktitle = text.replace("{", "").replace("}", "")
     else:
         dbooktitle = "NA"
 
-    dtitle=LatexNodes2Text().latex_to_text(bf["title"]).replace("{","").replace("}","")
+    dtitle = (
+        LatexNodes2Text().latex_to_text(bf["title"]).replace("{", "").replace("}", "")
+    )
     d = {
         "bib_id": bib_id,  # some formula for obtaining values
         "Title": dtitle,
