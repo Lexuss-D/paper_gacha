@@ -4,7 +4,7 @@
 
 A gacha game for those who don't know which paper should read next. 
 
-This game will generate 10 papers from all papers published by ACL. People who plays social games should be familier with this so I will not explain more, just have a try. 
+This game will select 10 papers from all papers published by ACL. People who plays social games should be familier with this so I will not explain more, just have a try. 
 
 Run gacha.py then start a suffering life!
 
