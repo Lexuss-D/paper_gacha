@@ -24,4 +24,5 @@ and the probability is 50%, 30%, 15%, 5% respectively
 
 ## TODO
 
-About rarity, I only decide few papers like BERT is UR, some annual best papers are SSR and SR. I am going to find somehow decide the rarity by citation counts or something else
+- About rarity, I only decide few papers like BERT is UR, some annual best papers are SSR and SR. I am going to find somehow decide the rarity by citation counts or something else
+- Maybe I should change the data file format from csv to Json ?
