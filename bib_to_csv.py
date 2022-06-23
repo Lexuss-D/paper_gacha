@@ -58,7 +58,13 @@ def set_rarity_by_citations(citation):
 
 
 def get_data_from_bib(entries):
-    """
+    """Get paper information from entries in bibdata
+
+    Args:
+        param1: bibdata.entries
+
+    Returns:
+        List: A list contains info of each paper
     """
     bibarray = []
     for bib_id in tqdm(entries):
