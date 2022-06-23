@@ -18,13 +18,23 @@ https://aclanthology.org/anthology.bib.gz
 - `` bib_to_csv.py `` is to generate a csv file of formatted data from ``anthology.bib``.
   - The information of citation are from Google Scholar
 
+  - The rarity is decided by the number of citations  
+    $citations \geq 10000 = UR$  
+    $10000 > citations \geq 5000 = SSR$  
+    $5000 > citations \geq 1000 = SR$  
+    $1000 > citations = R$
+
+  - Terrible time cost
+    - CPU: Intel(R) Xeon(R) CPU E5-2660 v4 @ 2.00GHz
+    - About 14 hours
+
 - ``gacha.py`` is the main process of gacha game.   
 
   - Currently I made 4 rarities : R, SR, SSR, UR, and the probability is 50%, 30%, 15%, 5% respectively
+  
+  - 10 papers per gacha
 
 ## TODO
-
-- About rarity, I only decide few papers like BERT is UR, some annual best papers are SSR and SR. I am going to find somehow decide the rarity by citation counts or something else
 - Maybe I should change the data file format from csv to Json ?
 - Multiprocessing for acceleration <- Now here
 
