@@ -15,7 +15,7 @@ paperlist = pd.read_csv(
         "Year",
         "url",
         "Book Title",
-        "citations"
+        "citations",
         "rate",
     ],
 )

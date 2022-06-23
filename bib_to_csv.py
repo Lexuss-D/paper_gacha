@@ -1,23 +1,24 @@
+from turtle import position
 from urllib.error import URLError
 import pandas as pd
 from bs4 import BeautifulSoup
 import requests
 import re
-import multiprocessing
+from multiprocessing import Pool
 from tqdm import tqdm
 from pylatexenc.latex2text import LatexNodes2Text
 from pybtex.database import parse_file
 
 
 def get_citations_result(keyword, number):
-    '''Get citation number of the paper from Google Scholar
+    """Get citation number of the paper from Google Scholar
 
     Args:
         param1(str): Title of the paper
         param2(int): Number of returned results from google scholar
     Returns:
         citations(int): How many times the paper is cited 
-    '''
+    """
 
     html_doc = requests.get(
         "https://scholar.google.co.jp/scholar?hl=ja&as_sdt=0%2C5&num="
@@ -25,11 +26,11 @@ def get_citations_result(keyword, number):
         + "&q="
         + keyword
     ).text
-    soup = BeautifulSoup(html_doc, "html.parser")  # BeautifulSoupの初期化
+    soup = BeautifulSoup(html_doc, "html.parser")
 
     tags = soup.find_all(text=re.compile("引用元"))  # citation
 
-    citations=0
+    citations = 0
     for tag in tags:
         citations = int(tag.replace("引用元", ""))
 
@@ -37,6 +38,14 @@ def get_citations_result(keyword, number):
 
 
 def set_rarity_by_citations(citation):
+    """Set the rarity of the paper by citations
+
+    Args:
+        param1(int): Citations of the paper
+    Returns:
+        Rarity(str): UR!
+    """
+
     label = ["R", "SR", "SSR", "UR"]
     if citation >= 10000:
         return "UR"
@@ -48,70 +57,86 @@ def set_rarity_by_citations(citation):
         return "R"
 
 
-raw_file_path = "./anthology.bib"
+def get_data_from_bib(entries):
+    """
+    """
+    bibarray = []
+    for bib_id in tqdm(entries):
 
-bibdata = parse_file(raw_file_path)
-bibkeys = bibdata.entries.keys()
-bibarray = []
+        bf = entries[bib_id].fields
+        bp = entries[bib_id].persons
 
-for bib_id in tqdm(bibdata.entries):
+        author_list = []
 
-    bf = bibdata.entries[bib_id].fields
-    bp = bibdata.entries[bib_id].persons
+        if bp.get("editor"):
+            for person in bp["editor"]:
+                first = " ".join(person.first_names)
+                middle = " ".join(person.middle_names)
+                last = " ".join(person.last_names)
+                author_list.append(" ".join([first, middle, last]))
+        elif bp.get("author"):
+            for person in bp["author"]:
+                first = " ".join(person.first_names)
+                middle = " ".join(person.middle_names)
+                last = " ".join(person.last_names)
+                author_list.append(" ".join([first, middle, last]))
 
-    author_list = []
+        dauthor = ",".join(author_list)
 
-    if bp.get("editor"):
-        for person in bp["editor"]:
-            first = " ".join(person.first_names)
-            middle = " ".join(person.middle_names)
-            last = " ".join(person.last_names)
-            author_list.append(" ".join([first, middle, last]))
-    elif bp.get("author"):
-        for person in bp["author"]:
-            first = " ".join(person.first_names)
-            middle = " ".join(person.middle_names)
-            last = " ".join(person.last_names)
-            author_list.append(" ".join([first, middle, last]))
+        if bf["year"] is None:
+            dyear = "NA"
+        else:
+            dyear = bf["year"]
 
-    dauthor = ",".join(author_list)
+        if bf.get("url"):
+            durl = bf["url"]
+        else:
+            durl = "NA"
 
-    if bf["year"] is None:
-        dyear = "NA"
-    else:
-        dyear = bf["year"]
+        if bf.get("booktitle"):
+            text = LatexNodes2Text().latex_to_text(bf["booktitle"])
+            dbooktitle = text.replace("{", "").replace("}", "")
+        else:
+            dbooktitle = "NA"
 
-    if bf.get("url"):
-        durl = bf["url"]
-    else:
-        durl = "NA"
+        dtitle = (
+            LatexNodes2Text()
+            .latex_to_text(bf["title"])
+            .replace("{", "")
+            .replace("}", "")
+        )
 
-    if bf.get("booktitle"):
-        text = LatexNodes2Text().latex_to_text(bf["booktitle"])
-        dbooktitle = text.replace("{", "").replace("}", "")
-    else:
-        dbooktitle = "NA"
+        dcitations = get_citations_result(dtitle, 1)
 
-    dtitle = (
-        LatexNodes2Text().latex_to_text(bf["title"]).replace("{", "").replace("}", "")
-    )
+        drate = set_rarity_by_citations(dcitations)
 
-    dcitations = get_citations_result(dtitle, 1)
+        d = {
+            "bib_id": bib_id,  # some formula for obtaining values
+            "Title": dtitle,
+            "author": LatexNodes2Text().latex_to_text(dauthor),
+            "Year": dyear,
+            "url": durl,
+            "Book Title": dbooktitle,
+            "citations": dcitations,
+            "rate": drate,
+        }
+        bibarray.append(d)
+  
+    return bibarray
 
-    drate = set_rarity_by_citations(dcitations)
 
-    d = {
-        "bib_id": bib_id,  # some formula for obtaining values
-        "Title": dtitle,
-        "author": LatexNodes2Text().latex_to_text(dauthor),
-        "Year": dyear,
-        "url": durl,
-        "Book Title": dbooktitle,
-        "citations": dcitations,
-        "rate": drate,
-    }
-    bibarray.append(d)
+if __name__ == "__main__":
 
-bibdataset = pd.DataFrame(bibarray)
+    raw_file_path = "./anthology.bib"
 
-bibdataset.to_csv("./formatted_df_data.csv", sep=",", index=False, header=False)
+    bibdata = parse_file(raw_file_path)
+    bibkeys = bibdata.entries.keys()
+    #print(len(bibdata.entries))
+
+    # multiprocessing
+
+    bibarray = get_data_from_bib(bibdata.entries)
+
+    bibdataset = pd.DataFrame(bibarray)
+
+    bibdataset.to_csv("./formatted_df_data.csv", sep=",", index=False, header=False)
