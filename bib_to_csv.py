@@ -1,14 +1,60 @@
+from urllib.error import URLError
 import pandas as pd
+from bs4 import BeautifulSoup
+import requests
+import re
+import multiprocessing
+from tqdm import tqdm
 from pylatexenc.latex2text import LatexNodes2Text
 from pybtex.database import parse_file
 
-raw_file_path = "/Users/lingzhidong/Documents/Github/paper_gacha/anthology.bib"
+
+def get_citations_result(keyword, number):
+    '''Get citation number of the paper from Google Scholar
+
+    Args:
+        param1(str): Title of the paper
+        param2(int): Number of returned results from google scholar
+    Returns:
+        citations(int): How many times the paper is cited 
+    '''
+
+    html_doc = requests.get(
+        "https://scholar.google.co.jp/scholar?hl=ja&as_sdt=0%2C5&num="
+        + str(number)
+        + "&q="
+        + keyword
+    ).text
+    soup = BeautifulSoup(html_doc, "html.parser")  # BeautifulSoupの初期化
+
+    tags = soup.find_all(text=re.compile("引用元"))  # citation
+
+    citations=0
+    for tag in tags:
+        citations = int(tag.replace("引用元", ""))
+
+    return citations
+
+
+def set_rarity_by_citations(citation):
+    label = ["R", "SR", "SSR", "UR"]
+    if citation >= 10000:
+        return "UR"
+    elif citation < 10000 & citation >= 5000:
+        return "SSR"
+    elif citation < 5000 & citation >= 1000:
+        return "SR"
+    else:
+        return "R"
+
+
+raw_file_path = "./anthology.bib"
 
 bibdata = parse_file(raw_file_path)
 bibkeys = bibdata.entries.keys()
 bibarray = []
 
-for bib_id in bibdata.entries:
+for bib_id in tqdm(bibdata.entries):
 
     bf = bibdata.entries[bib_id].fields
     bp = bibdata.entries[bib_id].persons
@@ -49,6 +95,11 @@ for bib_id in bibdata.entries:
     dtitle = (
         LatexNodes2Text().latex_to_text(bf["title"]).replace("{", "").replace("}", "")
     )
+
+    dcitations = get_citations_result(dtitle, 1)
+
+    drate = set_rarity_by_citations(dcitations)
+
     d = {
         "bib_id": bib_id,  # some formula for obtaining values
         "Title": dtitle,
@@ -56,7 +107,8 @@ for bib_id in bibdata.entries:
         "Year": dyear,
         "url": durl,
         "Book Title": dbooktitle,
-        "rate": "R",
+        "citations": dcitations,
+        "rate": drate,
     }
     bibarray.append(d)
 

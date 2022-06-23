@@ -2,7 +2,10 @@ import random
 import pandas as pd
 import numpy as np
 
+import requests
+
 data_path = "formatted_df_data.csv"
+
 paperlist = pd.read_csv(
     data_path,
     names=[
@@ -12,6 +15,7 @@ paperlist = pd.read_csv(
         "Year",
         "url",
         "Book Title",
+        "citations"
         "rate",
     ],
 )
