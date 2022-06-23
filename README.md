@@ -15,15 +15,16 @@ https://aclanthology.org/anthology.bib.gz
 
 ## Processing
 
-`` bib_to_csv.py `` is to generate a csv file of formatted data from ``anthology.bib``.
+- `` bib_to_csv.py `` is to generate a csv file of formatted data from ``anthology.bib``.
+  - The information of citation are from Google Scholar
 
-``gacha.py`` is the main process of gacha game.   
+- ``gacha.py`` is the main process of gacha game.   
 
-Currently I made 4 rarities : R, SR, SSR, UR, 
-and the probability is 50%, 30%, 15%, 5% respectively
+  - Currently I made 4 rarities : R, SR, SSR, UR, and the probability is 50%, 30%, 15%, 5% respectively
 
 ## TODO
 
 - About rarity, I only decide few papers like BERT is UR, some annual best papers are SSR and SR. I am going to find somehow decide the rarity by citation counts or something else
 - Maybe I should change the data file format from csv to Json ?
-- I can use ACL_ID of the paper to search the citation information in Semantic Scholar
+- Multiprocessing for acceleration <- Now here
+
