@@ -26,7 +26,9 @@ https://aclanthology.org/anthology.bib.gz
 
   - Terrible time cost
     - CPU: Intel(R) Xeon(R) CPU E5-2660 v4 @ 2.00GHz
-    - About 14 hours
+      - About 14 hours
+    - CPU: Ryzen 5900x
+      - 11 h 33 m 
 
 - ``gacha.py`` is the main process of gacha game.   
 
